@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="ad.size" content="width=900,height=600">	
+<script type="text/javascript">var clickTag = "https://www.westernunion.com/"</script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="scripts/TweenMax.min.js"></script>  
+</head>
+
+<body>
+	<!--    CANVAS / DIV / A    -->
+    <canvas id="Interactive" width=900 height=600 
+    style="outline:1px solid black; outline-offset:-1px;  position: absolute; left: 0; top: 0; z-index: 100;"><!--    100. INTERACTIVE      --></canvas>
+    <canvas id="Main" width=900 height=600  style="position: absolute; left: 0; top: 0;z-index:89;"></canvas>
+    <!--    INTERNAL JS         -->
+    <script type="text/javascript">
+		
+	function drawBackground(ctx)
+{
+	ctx.save();
+	drawCta(ctxMain, img_bg)
+	drawCta(ctxMain, img_d1)
+	drawCta(ctxMain, img_d2)
+	drawCta(ctxMain, img_t1)
+	drawCta(ctxMain, img_t2)
+	drawCta(ctxMain, img_t3)
+	drawCta(ctxMain, img_t4)
+	drawCta(ctxMain, img_t5)
+	drawCta(ctxMain, img_board)
+	drawCta(ctxMain, img_cta)
+	drawPics(ctxMain, img_rep)
+	drawDark(ctxMain, img_dark)
+	ctx.restore();
+}
+function drawPics(ctx, obj)
+{
+	ctx.save();
+	ctx.globalAlpha = obj.alpha;
+	ctx.translate(obj.x,obj.y)
+	ctx.scale (obj.scale, obj.scale);
+	//
+	ctx.drawImage(obj.pic, 0, 0, obj.pic.width, obj.pic.height);
+	//
+	ctx.restore();
+}
+function drawCta(ctx, obj)
+{
+	ctx.save();
+	ctx.globalAlpha = obj.alpha;
+	ctx.translate(obj.x,obj.y)
+	ctx.scale (obj.scale, obj.scale);
+	ctx.rotate(radian(obj.rot));
+	//
+	ctx.translate(- obj.pic.width/2,- obj.pic.height/2)
+	ctx.drawImage(obj.pic, 0, 0, obj.pic.width, obj.pic.height);
+	ctx.translate(obj.pic.width/2,obj.pic.height/2)
+	//
+	ctx.restore();
+}
+var finAlpha = 1
+function drawDark(ctx, obj)
+{
+	ctx.save();
+	ctx.globalAlpha = obj.alpha;
+	ctx.translate(obj.x,obj.y)
+	ctx.scale (obj.scale, obj.scale);
+	//
+	if(finAlpha < 0.001)
+	{
+		finAlpha = 0;
+	}
+	else if(finAlpha > 0.999)
+	{
+		finAlpha = 1;
+	}
+	ctx.beginPath();
+	ctx.moveTo(0,0);
+	ctx.lineTo(w,0);
+	ctx.lineTo(w,h);
+	ctx.lineTo(0,h);
+	ctx.closePath();
+	ctx.fillStyle = "rgba(0, 16, 36, " + finAlpha* 1 + ")";
+	ctx.fill();
+
+	ctx.restore();
+}</script>
+    <script type="text/javascript" >
+
+var canvasMain,
+	w, h;
+
+var imagesToLoad = 
+	{  
+		cta:        "images/cta.svg",
+		bg:         "images/pic1.jpg",
+		d1:       "images/d1.png",
+		d2:       "images/d2.png",
+		t1:       "images/t1.png",
+		t2:       "images/t2.png",
+		t3:       "images/t3.png",
+		t4:       "images/t4.png",
+		t5:       "images/t5.png",
+		board:       "images/board.png",
+		rep:        "images/replay.png"
+ 	};
+	
+var img_cta    = {},
+    img_bg     = {},
+	img_board   = {},
+	img_d1   = {},
+	img_d2   = {},
+	img_t1   = {},
+	img_t2   = {},
+	img_t3   = {},
+	img_t4   = {},
+	img_t5   = {},
+    img_rep    = {},
+    img_dark  = {}
+
+
+
+var loopNum = 0;
+var mousePos = {}
+var directUp = true
+
+
+function startAd()
+{
+	canvasInteractive = document.querySelector("#Interactive");
+	canvasMain          = document.querySelector("#Main");
+	ctxMain             = canvasMain.getContext('2d');
+	//
+	w = canvasMain.width; 
+	h = canvasMain.height;
+
+	//
+	loadImages(imagesToLoad, function(imagesLoaded)
+	{
+		img_cta.pic                = imagesLoaded.cta;
+		img_cta.canvas             = canvasMain;
+
+		img_bg.pic                 = imagesLoaded.bg;
+		img_bg.canvas              = canvasMain;
+		//
+		img_board.pic               = imagesLoaded.board
+		img_board.canvas            = canvasMain
+		// 
+		img_d1.pic               = imagesLoaded.d1
+		img_d1.canvas            = canvasMain
+		// 
+		img_d2.pic               = imagesLoaded.d2
+		img_d2.canvas            = canvasMain
+		// 
+		img_t1.pic               = imagesLoaded.t1
+		img_t1.canvas            = canvasMain
+		// 
+		img_t2.pic               = imagesLoaded.t2
+		img_t2.canvas            = canvasMain
+		// 
+		img_t3.pic               = imagesLoaded.t3
+		img_t3.canvas            = canvasMain
+		// 
+		img_t4.pic               = imagesLoaded.t4
+		img_t4.canvas            = canvasMain
+		// 
+		img_t5.pic               = imagesLoaded.t5
+		img_t5.canvas            = canvasMain
+		// 
+		img_rep.pic                = imagesLoaded.rep;
+		img_rep.canvas             = canvasMain;
+		//
+		img_dark.canvasMain        = canvasMain
+		//
+		init();
+	});
+}
+
+//
+function init()
+{
+	img_cta.x = 165	
+	img_cta.y = 560
+	img_cta.scale = .5
+	img_cta.alpha = 0
+	//
+	img_bg.x = w/2
+	img_bg.y = 300
+	img_bg.scale = 1
+	img_bg.alpha = 1
+	//
+	img_d1.x = w/2
+	img_d1.y = 320
+	img_d1.alpha = 0
+	//
+	img_d2.x = w/2
+	img_d2.y = 320
+	img_d2.alpha = 0
+	img_d2.scale = 1
+	//
+	img_t1.x = w/2
+	img_t1.y = 320
+	img_t1.alpha = 0
+	//
+	img_t2.x = w/2
+	img_t2.y = 320
+	img_t2.alpha = 0
+	//
+	img_t3.x = 447
+	img_t3.y = 320
+	img_t3.alpha = 0
+	//
+	img_t4.x = 446
+	img_t4.y = 320
+	img_t4.alpha = 0
+	//
+	img_t5.x = 442
+	img_t5.y = 320
+	img_t5.alpha = 0
+	//
+	img_board.x = w/2
+	img_board.y = 850
+	img_board.alpha = 1
+	img_board.scale = 1
+	//
+	img_rep.x = w + img_rep.pic.width
+	img_rep.y = 0 - img_rep.pic.height
+	img_rep.scale = 1
+	img_rep.alpha = 0
+	//
+	img_dark.x = 0
+	img_dark.y = 0
+	img_dark.alpha = 1
+	//
+	mousePos.x = 0;
+	mousePos.y = 0;
+	//
+	TweenMax.to(img_dark, 0.9, {alpha:0, delay:0.0})
+	//
+	TweenMax.delayedCall(1.1, frame1)
+	canvasInteractive.addEventListener('mousemove', buttonMove, false);
+	canvasInteractive.addEventListener('mouseout', buttonOut, false);
+	canvasInteractive.addEventListener('click', mClick, false);	
+	TweenLite.ticker.addEventListener("tick", update);
+
+}
+
+function frame1()
+{
+	loopNum ++
+	TweenMax.to(img_d1, .5, {y:300, alpha:1, delay:0.1})
+	TweenMax.to(img_t1, .5, {y:300, alpha:1, delay:0.2})
+	TweenMax.to(img_t2, .5, {y:300, alpha:1, delay:0.3})
+	TweenMax.to(img_t3, .5, {y:300, alpha:1, delay:0.4})
+	TweenMax.to(img_t4, .5, {y:300, alpha:1, delay:0.5})
+	TweenMax.to(img_t5, .5, {y:300, alpha:1, delay:0.6})
+	TweenMax.to(img_d2, .5, {y:300, alpha:1, delay:1})
+	TweenMax.to(img_board, 1, {y:300, delay:0})
+	TweenMax.to(img_cta, .7, {alpha:1, delay:2})
+	TweenMax.delayedCall(4.5, frame2)
+}
+
+function frame2()
+{
+	TweenMax.delayedCall(9.5, restart)
+	TweenMax.to(img_cta, 0.4, {scale:.45,   ease:Back.easeOut, delay:0.5})
+	TweenMax.to(img_cta, 0.4, {scale:.5,   ease:Back.easeOut, delay:1})
+
+}
+
+function restart()
+{
+	if(loopNum === 1)
+	{
+		TweenMax.to(img_dark, 0.9, {alpha:1, delay:0.0, onComplete:function()
+		{init()
+		}});
+	}
+}
+
+function mClick(e)
+{ window.open(window.clickTag, '_blank');}
+
+
+
+function buttonMove(e)
+{
+	mousePos = getMousePos(e)
+	document.getElementById("Interactive").style.cursor = "pointer";
+}
+function buttonOut(e)
+{
+	document.getElementById("Interactive").style.cursor = "auto";
+}
+function update()
+{
+	drawBackground(ctxMain);
+}
+function getMousePos(e)
+{
+   var rect = canvasInteractive.getBoundingClientRect();
+   return {
+	  x: e.clientX - rect.left,
+	  y: e.clientY - rect.top
+   };
+}
+//
+function loadImages(imagesToBeLoaded, drawCallback)
+{
+	var imagesLoaded = {};
+	var loadedImages = 0;
+	var numberOfImagesToLoad = 0;
+	//
+	for(var name in imagesToBeLoaded)
+	{
+		numberOfImagesToLoad++;
+	}
+	
+	for(var name in imagesToBeLoaded)
+	{
+		imagesLoaded[name] = new Image();
+		imagesLoaded[name].onload = function()
+		{
+			if(++loadedImages >= numberOfImagesToLoad)
+			{
+				drawCallback(imagesLoaded);
+			}
+		};
+		//
+		imagesLoaded[name].src = imagesToBeLoaded[name];
+	}
+}
+
+function radian(a)
+{ return a * Math.PI / 180;}
+
+window.onload = function(){
+	startAd()
+};</script> 
+</body>
+</html>
+
